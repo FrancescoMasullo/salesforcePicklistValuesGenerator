@@ -166,7 +166,7 @@ ${xmlValues}    <masterLabel>${escapeXML(masterLabel)}</masterLabel>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <types>
         <members>${escapeXML(globalValueSetName)}</members>
-        <n>GlobalValueSet</n>
+        <name>GlobalValueSet</name>
     </types>
     <version>58.0</version>
 </Package>`;
@@ -225,7 +225,7 @@ function copyPackageXML() {
 }
 
 function openWorkbench() {
-    window.open('https://workbench.developerforce.com/deploy/', '_blank');
+    window.open('https://workbench.developerforce.com/', '_blank');
 }
 
 function downloadDeploymentZip() {
