@@ -106,7 +106,7 @@ ${xmlValues}            </valueSetDefinition>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <types>
         <members>${escapeXML(objectName)}</members>
-        <n>CustomObject</n>
+        <name>${fieldName}</name>
     </types>
     <version>58.0</version>
 </Package>`;
