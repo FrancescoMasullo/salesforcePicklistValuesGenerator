@@ -105,8 +105,8 @@ ${xmlValues}            </valueSetDefinition>
     const packageXML = `<?xml version="1.0" encoding="UTF-8"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <types>
-        <members>${escapeXML(objectName)}</members>
-        <name>${fieldName}</name>
+        <members>${escapeXML(objectName)}.${escapeXML(fieldName)}</members>
+        <name>CustomField</name>
     </types>
     <version>58.0</version>
 </Package>`;
