@@ -346,3 +346,8 @@
             }
         }
 </style>
+.status { margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 6px; border-left: 4px solid; }
+.status.hidden { display: none; }
+.status.success { background: #e6f4ea; border-color: #2e7d32; color: #1b5e20; }
+.status.warning { background: #fff8e1; border-color: #f9a825; color: #6d4c00; }
+.status.error { background: #fdecea; border-color: #c62828; color: #7f1d1d; }
