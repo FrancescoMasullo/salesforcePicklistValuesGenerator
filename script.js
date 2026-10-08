@@ -53,6 +53,7 @@ function generateXML() {
     $('output').value = out.snippet;
     $('completeXML').value = out.completeXML;
     $('packageXML').value = out.packageXML;
+    $('filePath').textContent = out.filePath;
 
     const isField = cfg.mode === 'field';
     const steps = cfg.format === 'sfdx'
@@ -69,8 +70,8 @@ function generateXML() {
     $('deploymentInstructions').replaceChildren(...[
         `${isField ? 'Custom Field' : 'Global Value Set'} deployment steps:`,
         ...steps,
-        ...(isField ? ['⚠️ Deploying this field overwrites its label, required, externalId and trackTrending with the values shown in the XML.'] : []),
-        ...(isField && cfg.controllingField ? [`ℹ️ Dependent picklist: ${cfg.controllingField} must already exist on ${cfg.objectName} and its values must match the controlling values used here.`] : []),
+        ...(isField ? ['Warning: deploying this field overwrites its label, required, externalId and trackTrending with the values shown in the XML.'] : []),
+        ...(isField && cfg.controllingField ? [`Dependent picklist: ${cfg.controllingField} must already exist on ${cfg.objectName} and its values must match the controlling values used here.`] : []),
     ].map(t => Object.assign(document.createElement('div'), { textContent: t })));
 
     $('downloadBtn').style.display = $('workbenchBtn').style.display = 'inline-flex';
@@ -85,7 +86,8 @@ function clearData() {
 function clearOutputs() {
     last = null;
     $('output').value = $('completeXML').value = $('packageXML').value = '';
-    $('deploymentInstructions').textContent = 'Choose a mode and generate XML to see deployment instructions.';
+    $('filePath').textContent = 'Generate to see the file path';
+    $('deploymentInstructions').textContent = 'Choose a target and generate to see deployment steps.';
     $('downloadBtn').style.display = $('workbenchBtn').style.display = 'none';
     showStatus('', []);
 }
