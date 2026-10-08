@@ -16,6 +16,9 @@ A lightweight web tool to generate deployment-ready XML files for Salesforce pic
 - Escapes special XML characters automatically
 - Handles quoted CSV cells (`"Rossi, Mario"`), skips the header row, and reports skipped rows, duplicates and labels over 255 chars
 - Configurable API version for `package.xml`
+- Optional columns after Label: `Default`, `Active` (blank = true), `Controlling values` (`;`-separated)
+- Dependent picklists: set a Controlling Field and give each value its controlling values
+- Output as Workbench ZIP (`package.xml`) or SFDX source (`*.field-meta.xml`, `*.globalValueSet-meta.xml`)
 - Includes keyboard shortcuts for power users:
   - `Ctrl/Cmd + Enter`: Generate XML
   - `Ctrl/Cmd + Shift + C`: Copy complete XML
@@ -39,6 +42,10 @@ node test.js
 Parsing and XML generation live in `picklist.js` (no DOM); `script.js` is the UI layer.
 
 > ⚠️ In Custom Field mode the generated field overwrites the label, `required`, `externalId` and `trackTrending` of an existing field. Test in a sandbox first.
+
+## 🚀 CI / GitHub Pages
+
+`.github/workflows/ci.yml` runs `node test.js` on every PR and, on `main`, publishes the site to GitHub Pages. One-time setup: Settings → Pages → Source: **GitHub Actions**.
 
 ## 📄 License
 

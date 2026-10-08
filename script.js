@@ -18,7 +18,9 @@ function getConfig() {
         fieldLabel: $('fieldLabel').value.trim(),
         globalValueSetName: $('globalValueSetName').value.trim(),
         masterLabel: $('masterLabel').value.trim(),
+        controllingField: $('controllingField').value.trim(),
         apiVersion: $('apiVersion').value.trim(),
+        format: selected('format'),
     };
 }
 
@@ -30,12 +32,20 @@ document.querySelectorAll('input[name="mode"]').forEach(radio => {
     });
 });
 
+// Switching output format re-renders an existing result
+document.querySelectorAll('input[name="format"]').forEach(radio => {
+    radio.addEventListener('change', () => { if (last) generateXML(); });
+});
+
 function generateXML() {
     const cfg = getConfig();
     const data = $('excelData').value;
     if (!data.trim()) return showStatus('error', ['Please paste your Excel data first.']);
 
-    const { values, errors: dataErrors, warnings } = parsePicklistValues(data, selected('separator') === 'tab' ? '\t' : ',');
+    const { values, errors: dataErrors, warnings } = parsePicklistValues(data, selected('separator') === 'tab' ? '\t' : ',', {
+        mode: cfg.mode,
+        controllingField: cfg.mode === 'field' ? cfg.controllingField : '',
+    });
     const errors = [...validateConfig(cfg), ...dataErrors];
     if (errors.length) return showStatus('error', [...errors, ...warnings]);
 
@@ -45,13 +55,22 @@ function generateXML() {
     $('packageXML').value = out.packageXML;
 
     const isField = cfg.mode === 'field';
+    const steps = cfg.format === 'sfdx'
+        ? [
+            `1. Save the Complete XML as ${out.filePath} (or unzip the download into your SFDX project)`,
+            `2. Deploy: sf project deploy start --source-dir ${out.filePath}`,
+        ]
+        : [
+            `1. Save the Complete XML as ${out.filePath}`,
+            '2. Save the Package.xml as package.xml',
+            '3. Zip both files keeping the folder structure (or use the button below)',
+            '4. Deploy the ZIP with Salesforce Workbench',
+        ];
     $('deploymentInstructions').replaceChildren(...[
         `${isField ? 'Custom Field' : 'Global Value Set'} deployment steps:`,
-        `1. Save the Complete XML as ${out.filePath}`,
-        '2. Save the Package.xml as package.xml',
-        '3. Zip both files keeping the folder structure (or use the button below)',
-        '4. Deploy the ZIP with Salesforce Workbench',
+        ...steps,
         ...(isField ? ['⚠️ Deploying this field overwrites its label, required, externalId and trackTrending with the values shown in the XML.'] : []),
+        ...(isField && cfg.controllingField ? [`ℹ️ Dependent picklist: ${cfg.controllingField} must already exist on ${cfg.objectName} and its values must match the controlling values used here.`] : []),
     ].map(t => Object.assign(document.createElement('div'), { textContent: t })));
 
     $('downloadBtn').style.display = $('workbenchBtn').style.display = 'inline-flex';
@@ -87,15 +106,12 @@ function openWorkbench() {
 }
 
 function downloadDeploymentZip() {
-    const completeXML = $('completeXML').value;
-    const packageXML = $('packageXML').value;
-    if (!last || !completeXML || !packageXML) return showStatus('error', ['Please generate XML first.']);
+    if (!last) return showStatus('error', ['Please generate XML first.']);
     if (typeof JSZip === 'undefined') return showStatus('error', ['ZIP library not loaded - copy the files manually.']);
 
-    const { filePath, zipName } = last;
+    const { files, zipName } = last;
     const zip = new JSZip();
-    zip.file('package.xml', packageXML);
-    zip.file(filePath, completeXML);
+    Object.entries(files).forEach(([path, content]) => zip.file(path, content));
     zip.generateAsync({ type: 'blob' })
         .then(blob => {
             const link = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: zipName });

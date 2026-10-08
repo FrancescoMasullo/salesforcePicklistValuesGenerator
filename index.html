@@ -56,6 +56,10 @@
                     <label for="fieldLabel">Field Label:</label>
                     <input type="text" id="fieldLabel">
                 </div>
+                <div class="input-group">
+                    <label for="controllingField">Controlling Field API Name (optional, makes it a dependent picklist):</label>
+                    <input type="text" id="controllingField">
+                </div>
             </div>
 
             <div id="globalInputs" class="global-input hidden">
@@ -73,6 +77,19 @@
                 <label for="apiVersion">API Version:</label>
                 <input type="text" id="apiVersion" value="66.0">
             </div>
+            <div class="input-group">
+                <label>Output format:</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="fmtMdapi" name="format" value="mdapi" checked>
+                        <label for="fmtMdapi">Workbench (package.xml + ZIP)</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="fmtSfdx" name="format" value="sfdx">
+                        <label for="fmtSfdx">SFDX source (*-meta.xml)</label>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <section class="section">
@@ -83,7 +100,9 @@
                     <strong>Example:</strong><br>
                     <code>API_NAME_1&nbsp;&nbsp;&nbsp;&nbsp;Display Label 1<br>
                     API_NAME_2&nbsp;&nbsp;&nbsp;&nbsp;Display Label 2</code><br>
-                    <em>or: API_NAME_1,Display Label 1</em>
+                    <em>or: API_NAME_1,Display Label 1</em><br><br>
+                    <strong>Optional columns</strong> (in this order): <code>Default</code> (true/false), <code>Active</code> (true/false, blank = true), <code>Controlling values</code> (separated by <code>;</code>, dependent picklists only).<br>
+                    <code>API_NAME_1&nbsp;&nbsp;&nbsp;&nbsp;Label 1&nbsp;&nbsp;&nbsp;&nbsp;true&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IT;FR</code>
                 </div>
             </div>
             
