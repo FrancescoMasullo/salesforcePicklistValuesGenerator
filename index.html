@@ -4,183 +4,156 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Salesforce Picklist XML Generator</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23009DDC;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23009DDC;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='6' fill='url(%23grad)'/%3E%3Cpath d='M8 12h16v2H8zm0 4h16v2H8zm0 4h12v2H8z' fill='white'/%3E%3Cpath d='M22 18l4 2-4 2v-4z' fill='white'/%3E%3C/svg%3E">
+    <meta name="description" content="Turn a spreadsheet into deploy-ready Salesforce picklist metadata. Runs entirely in your browser.">
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230F1A22'/%3E%3Cpath d='M8 11h16M8 16h16M8 21h10' stroke='%232DD4BF' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🚀 Salesforce Picklist XML Generator</h1>
-            <p class="subtitle">Generate deployment-ready XML files for Salesforce picklist values</p>
-        </header>
-        
-        <div class="instructions">
-            <h3>📋 How to Use</h3>
-            <ol>
-                <li><strong>Choose Mode:</strong> Select between Custom Field or Global Value Set</li>
-                <li><strong>Enter Details:</strong> Fill in the required API names and labels</li>
-                <li><strong>Import Data:</strong> Copy your Excel data (API Name and Label columns) and paste below</li>
-                <li><strong>Generate XML:</strong> Click "Generate XML" to create your picklist configuration</li>
-                <li><strong>Download & Deploy:</strong> Download the ZIP file and deploy via Salesforce Workbench</li>
-                <li><strong>Deploy:</strong> Use the Workbench button to open the deployment tool directly</li>
-            </ol>
-            <div class="tip">
-                <strong>💡 Pro Tip:</strong> The tool automatically escapes special XML characters and creates a complete deployment package ready for Salesforce.
-            </div>
+    <header class="topbar">
+        <div>
+            <h1>Picklist XML Generator</h1>
+            <p>Paste a spreadsheet, get Salesforce metadata ready to deploy. Everything runs in your browser; nothing is uploaded.</p>
+        </div>
+        <a class="repo-link" href="https://github.com/FrancescoMasullo/salesforcePicklistValuesGenerator" rel="noopener">Source on GitHub</a>
+    </header>
+
+    <main class="workbench">
+        <div class="pane pane-input">
+            <section aria-labelledby="h-target">
+                <h2 id="h-target">Target</h2>
+                <div class="segmented" role="radiogroup" aria-label="Mode">
+                    <input type="radio" id="fieldMode" name="mode" value="field" checked>
+                    <label for="fieldMode">Custom field</label>
+                    <input type="radio" id="globalMode" name="mode" value="global">
+                    <label for="globalMode">Global value set</label>
+                </div>
+
+                <div id="fieldInputs" class="form-grid">
+                    <div class="input-group">
+                        <label for="objectName">Object API name</label>
+                        <input type="text" id="objectName" placeholder="Account" autocomplete="off" spellcheck="false">
+                    </div>
+                    <div class="input-group">
+                        <label for="fieldName">Field API name</label>
+                        <input type="text" id="fieldName" placeholder="Tier__c" autocomplete="off" spellcheck="false">
+                    </div>
+                    <div class="input-group">
+                        <label for="fieldLabel">Field label</label>
+                        <input type="text" id="fieldLabel" placeholder="Tier" autocomplete="off">
+                    </div>
+                    <div class="input-group">
+                        <label for="controllingField">Controlling field <span class="optional">optional</span></label>
+                        <input type="text" id="controllingField" placeholder="Country__c" autocomplete="off" spellcheck="false">
+                        <p class="hint">Set it to build a dependent picklist.</p>
+                    </div>
+                </div>
+
+                <div id="globalInputs" class="form-grid hidden">
+                    <div class="input-group">
+                        <label for="globalValueSetName">Global value set API name</label>
+                        <input type="text" id="globalValueSetName" placeholder="Colors" autocomplete="off" spellcheck="false">
+                    </div>
+                    <div class="input-group">
+                        <label for="masterLabel">Master label</label>
+                        <input type="text" id="masterLabel" placeholder="Colors" autocomplete="off">
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label for="apiVersion">API version</label>
+                        <input type="text" id="apiVersion" value="66.0" autocomplete="off" spellcheck="false">
+                    </div>
+                    <div class="input-group">
+                        <span class="label" id="l-format">Output format</span>
+                        <div class="segmented" role="radiogroup" aria-labelledby="l-format">
+                            <input type="radio" id="fmtMdapi" name="format" value="mdapi" checked>
+                            <label for="fmtMdapi">Workbench ZIP</label>
+                            <input type="radio" id="fmtSfdx" name="format" value="sfdx">
+                            <label for="fmtSfdx">SFDX source</label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section aria-labelledby="h-values">
+                <h2 id="h-values">Values</h2>
+                <div class="input-group">
+                    <label for="excelData">Paste from Excel or CSV</label>
+                    <textarea id="excelData" rows="9" spellcheck="false" placeholder="STEEL_001&#9;Steel Components&#10;PLASTIC_002&#9;Plastic Materials&#10;ALUMINUM_003&#9;Aluminum Parts"></textarea>
+                </div>
+
+                <div class="inline-row">
+                    <span class="label" id="l-sep">Separator</span>
+                    <div class="segmented segmented-sm" role="radiogroup" aria-labelledby="l-sep">
+                        <input type="radio" id="tab" name="separator" value="tab" checked>
+                        <label for="tab">Tab</label>
+                        <input type="radio" id="comma" name="separator" value="comma">
+                        <label for="comma">Comma</label>
+                    </div>
+                    <span class="hint">Detected automatically on paste.</span>
+                </div>
+
+                <details class="columns">
+                    <summary>Columns and how to use</summary>
+                    <table>
+                        <thead><tr><th>#</th><th>Column</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td>1</td><td>API name</td><td>Required. Must be unique.</td></tr>
+                            <tr><td>2</td><td>Label</td><td>Required. Up to 255 characters.</td></tr>
+                            <tr><td>3</td><td>Default</td><td>true or false. Only one default in a single-select field.</td></tr>
+                            <tr><td>4</td><td>Active</td><td>true or false. Blank means true.</td></tr>
+                            <tr><td>5</td><td>Controlling values</td><td>Separated by <code>;</code>. Dependent picklists only.</td></tr>
+                        </tbody>
+                    </table>
+                    <p class="hint">A header row is skipped automatically. Quoted cells such as <code>"Rossi, Mario"</code> are supported.</p>
+                </details>
+
+                <div class="actions">
+                    <button class="btn btn-primary" data-action="generateXML">Generate <kbd>Ctrl</kbd><kbd>Enter</kbd></button>
+                    <button class="btn btn-quiet" data-action="clearData">Clear</button>
+                </div>
+            </section>
         </div>
 
-        <section class="section">
-            <h2>🎯 Configuration</h2>
-            <div class="mode-selector">
-                <div class="mode-option">
-                    <input type="radio" id="fieldMode" name="mode" value="field" checked>
-                    <label for="fieldMode">Custom Field on Object</label>
-                </div>
-                <div class="mode-option">
-                    <input type="radio" id="globalMode" name="mode" value="global">
-                    <label for="globalMode">Global Value Set</label>
-                </div>
-            </div>
-
-            <div id="fieldInputs" class="field-inputs">
-                <div class="input-group">
-                    <label for="objectName">Object API Name:</label>
-                    <input type="text" id="objectName">
-                </div>
-                <div class="input-group">
-                    <label for="fieldName">Field API Name:</label>
-                    <input type="text" id="fieldName">
-                </div>
-                <div class="input-group">
-                    <label for="fieldLabel">Field Label:</label>
-                    <input type="text" id="fieldLabel">
-                </div>
-                <div class="input-group">
-                    <label for="controllingField">Controlling Field API Name (optional, makes it a dependent picklist):</label>
-                    <input type="text" id="controllingField">
-                </div>
-            </div>
-
-            <div id="globalInputs" class="global-input hidden">
-                <div class="input-group">
-                    <label for="globalValueSetName">Global Value Set API Name:</label>
-                    <input type="text" id="globalValueSetName">
-                </div>
-                <div class="input-group">
-                    <label for="masterLabel">Master Label:</label>
-                    <input type="text" id="masterLabel">
-                </div>
-            </div>
-
-            <div class="input-group">
-                <label for="apiVersion">API Version:</label>
-                <input type="text" id="apiVersion" value="66.0">
-            </div>
-            <div class="input-group">
-                <label>Output format:</label>
-                <div class="radio-group">
-                    <div class="radio-option">
-                        <input type="radio" id="fmtMdapi" name="format" value="mdapi" checked>
-                        <label for="fmtMdapi">Workbench (package.xml + ZIP)</label>
-                    </div>
-                    <div class="radio-option">
-                        <input type="radio" id="fmtSfdx" name="format" value="sfdx">
-                        <label for="fmtSfdx">SFDX source (*-meta.xml)</label>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="section">
-            <h2>📊 Data Input</h2>
-            <div class="data-format-info">
-                <strong>Supported formats:</strong> Tab-separated or comma-separated values
-                <div class="example">
-                    <strong>Example:</strong><br>
-                    <code>API_NAME_1&nbsp;&nbsp;&nbsp;&nbsp;Display Label 1<br>
-                    API_NAME_2&nbsp;&nbsp;&nbsp;&nbsp;Display Label 2</code><br>
-                    <em>or: API_NAME_1,Display Label 1</em><br><br>
-                    <strong>Optional columns</strong> (in this order): <code>Default</code> (true/false), <code>Active</code> (true/false, blank = true), <code>Controlling values</code> (separated by <code>;</code>, dependent picklists only).<br>
-                    <code>API_NAME_1&nbsp;&nbsp;&nbsp;&nbsp;Label 1&nbsp;&nbsp;&nbsp;&nbsp;true&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IT;FR</code>
-                </div>
-            </div>
-            
-            <div class="input-section">
-                <div class="input-group excel-input">
-                    <label for="excelData">Paste your Excel data here:</label>
-                    <textarea id="excelData" rows="10" placeholder="Paste your data here...&#10;Example:&#10;STEEL_001    Steel Components&#10;PLASTIC_002    Plastic Materials&#10;ALUMINUM_003    Aluminum Parts"></textarea>
-                </div>
-                <div class="input-group format-options">
-                    <label>Data Format:</label>
-                    <div class="radio-group">
-                        <div class="radio-option">
-                            <input type="radio" id="tab" name="separator" value="tab" checked>
-                            <label for="tab">Tab-separated</label>
-                        </div>
-                        <div class="radio-option">
-                            <input type="radio" id="comma" name="separator" value="comma">
-                            <label for="comma">Comma-separated</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="action-buttons">
-                <button class="btn-primary" onclick="generateXML()">🔄 Generate XML</button>
-                <button class="btn-secondary" onclick="clearData()">🗑️ Clear</button>
-            </div>
+        <div class="pane pane-output">
             <div id="status" class="status hidden" role="status" aria-live="polite"></div>
-        </section>
 
-        <section class="section">
-            <h2>📝 Generated XML Values</h2>
-            <textarea id="output" class="output" rows="15" readonly placeholder="Generated XML will appear here..."></textarea>
-            <div class="action-buttons">
-                <button class="btn-success" onclick="copyToClipboard()">📋 Copy to Clipboard</button>
-            </div>
-        </section>
-
-        <section class="section">
-            <h2>📋 Complete XML Structure</h2>
-            <p>Complete XML structure ready for deployment:</p>
-            <textarea id="completeXML" class="output" rows="20" readonly placeholder="Complete XML structure will appear here..."></textarea>
-            <div class="action-buttons">
-                <button class="btn-success" onclick="copyCompleteXML()">📋 Copy Complete XML</button>
-            </div>
-        </section>
-
-        <section class="section">
-            <h2>📦 Deployment</h2>
-            <div class="deployment-info">
-                <div class="deployment-instructions">
-                    <h3>📋 Deployment Instructions</h3>
-                    <p id="deploymentInstructions">Choose a mode and generate XML to see deployment instructions.</p>
-                </div>
-                
-                <div class="deployment-actions">
-                    <div class="action-buttons">
-                        <button class="btn-primary download-btn" onclick="downloadDeploymentZip()" id="downloadBtn" style="display: none;">📦 Download Deployment ZIP</button>
-                        <button class="btn-workbench" onclick="openWorkbench()" id="workbenchBtn" style="display: none;">🌐 Open Salesforce Workbench</button>
+            <section aria-labelledby="h-result">
+                <div class="result-head">
+                    <div>
+                        <h2 id="h-result">Result</h2>
+                        <p class="filepath" id="filePath">Generate to see the file path</p>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-small" data-action="copyCompleteXML">Copy XML</button>
+                        <button class="btn btn-small btn-primary download-btn" data-action="downloadDeploymentZip" id="downloadBtn" style="display: none;">Download ZIP</button>
+                        <button class="btn btn-small" data-action="openWorkbench" id="workbenchBtn" style="display: none;">Open Workbench</button>
                     </div>
                 </div>
-            </div>
-            
-            <div class="package-xml-section">
-                <h3>📄 Package.xml</h3>
-                <textarea id="packageXML" class="output" rows="8" readonly placeholder="Package.xml will appear here..."></textarea>
-                <div class="action-buttons">
-                    <button class="btn-success" onclick="copyPackageXML()">📋 Copy Package.xml</button>
-                </div>
-            </div>
-        </section>
-    </div>
+                <textarea id="completeXML" class="code" rows="20" readonly spellcheck="false" aria-label="Complete XML" placeholder="The complete XML appears here."></textarea>
+
+                <div id="deploymentInstructions" class="deploy">Choose a target and generate to see deployment steps.</div>
+
+                <details class="extra">
+                    <summary>Values only</summary>
+                    <textarea id="output" class="code" rows="10" readonly spellcheck="false" aria-label="Values only"></textarea>
+                    <button class="btn btn-small" data-action="copyToClipboard">Copy values</button>
+                </details>
+                <details class="extra">
+                    <summary>package.xml</summary>
+                    <textarea id="packageXML" class="code" rows="8" readonly spellcheck="false" aria-label="package.xml"></textarea>
+                    <button class="btn btn-small" data-action="copyPackageXML">Copy package.xml</button>
+                </details>
+            </section>
+        </div>
+    </main>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
             integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="picklist.js"></script>
     <script src="script.js"></script>
-
 </body>
 </html>
