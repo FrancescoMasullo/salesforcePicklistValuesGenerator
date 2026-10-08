@@ -8,7 +8,7 @@ assert.equal(escapeXML(0), '0');
 
 // tab input, CRLF, header row, blank line
 let r = parsePicklistValues('API Name\tLabel\r\nA_1\tAlpha\r\n\r\nB_2\tBeta', '\t');
-assert.deepEqual(r.values, [{ fullName: 'A_1', label: 'Alpha' }, { fullName: 'B_2', label: 'Beta' }]);
+assert.deepEqual(r.values.map(v => [v.fullName, v.label]), [['A_1', 'Alpha'], ['B_2', 'Beta']]);
 assert.deepEqual(r.errors, []);
 
 // quoted comma in label, escaped quote
@@ -41,5 +41,33 @@ assert.equal(o.filePath, 'objects/Account.object');
 o = buildOutputs({ mode: 'global', globalValueSetName: 'Colors', masterLabel: 'Colors', apiVersion: '66.0' }, [{ fullName: 'R', label: 'Red' }]);
 assert.match(o.completeXML, /<customValue>[\s\S]*<masterLabel>Colors<\/masterLabel>/);
 assert.equal(o.filePath, 'globalValueSets/Colors.globalValueSet');
+
+
+// ---- extended columns, dependent picklist, SFDX ----
+r = parsePicklistValues('A,Alpha,yes,\nB,Beta,,no\nC,Gamma,maybe', ',', { mode: 'field' });
+assert.deepEqual(r.values.slice(0, 2).map(v => [v.isDefault, v.isActive]), [[true, true], [false, false]]);
+assert.match(r.errors[0], /Default must be true\/false/);
+assert.match(parsePicklistValues('A,a,true\nB,b,true', ',', { mode: 'field' }).errors[0], /only one/);
+assert.deepEqual(parsePicklistValues('A,a,true\nB,b,true', ',', { mode: 'global' }).errors, []);
+
+r = parsePicklistValues('Rome,Roma,,,IT\nParis,Parigi,,,FR;IT\nOrphan,Orfano', ',', { mode: 'field', controllingField: 'Country__c' });
+assert.deepEqual(r.values[1].controllingValues, ['FR', 'IT']);
+assert.match(r.warnings[0], /no controlling values/);
+const dep = buildOutputs({ ...field, controllingField: 'Country__c' }, r.values);
+assert.match(dep.completeXML, /<controllingField>Country__c<\/controllingField>/);
+assert.match(dep.completeXML, /<valueSettings>\s*<controllingFieldValue>FR<\/controllingFieldValue>\s*<controllingFieldValue>IT<\/controllingFieldValue>\s*<valueName>Paris<\/valueName>/);
+assert.equal((dep.completeXML.match(/<valueSettings>/g) || []).length, 2); // Orphan gets none
+assert.match(validateConfig({ ...field, controllingField: 'Tier__c' })[0], /itself/);
+
+const inactive = buildOutputs(field, [{ fullName: 'X', label: 'X', isDefault: true, isActive: false, controllingValues: [] }]);
+assert.match(inactive.snippet, /<default>true<\/default>\s*<label>X<\/label>\s*<isActive>false<\/isActive>/);
+
+let sf = buildOutputs({ ...field, format: 'sfdx' }, [{ fullName: 'A', label: 'Alpha', isDefault: false, isActive: true, controllingValues: [] }]);
+assert.deepEqual(Object.keys(sf.files), ['force-app/main/default/objects/Account/fields/Tier__c.field-meta.xml']);
+assert.match(sf.completeXML, /^<\?xml[^>]*\?>\n<CustomField [^>]*>\n    <fullName>Tier__c<\/fullName>/);
+assert.ok(!sf.completeXML.includes('CustomObject'));
+sf = buildOutputs({ mode: 'global', globalValueSetName: 'Colors', masterLabel: 'Colors', apiVersion: '66.0', format: 'sfdx' }, [{ fullName: 'R', label: 'Red' }]);
+assert.deepEqual(Object.keys(sf.files), ['force-app/main/default/globalValueSets/Colors.globalValueSet-meta.xml']);
+assert.deepEqual(Object.keys(buildOutputs(field, []).files), ['package.xml', 'objects/Account.object']);
 
 console.log('All tests passed');
