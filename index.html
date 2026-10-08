@@ -111,8 +111,8 @@
                 </details>
 
                 <div class="actions">
-                    <button class="btn btn-primary" onclick="generateXML()">Generate <kbd>Ctrl</kbd><kbd>Enter</kbd></button>
-                    <button class="btn btn-quiet" onclick="clearData()">Clear</button>
+                    <button class="btn btn-primary" data-action="generateXML">Generate <kbd>Ctrl</kbd><kbd>Enter</kbd></button>
+                    <button class="btn btn-quiet" data-action="clearData">Clear</button>
                 </div>
             </section>
         </div>
@@ -127,9 +127,9 @@
                         <p class="filepath" id="filePath">Generate to see the file path</p>
                     </div>
                     <div class="actions">
-                        <button class="btn btn-small" onclick="copyCompleteXML()">Copy XML</button>
-                        <button class="btn btn-small btn-primary download-btn" onclick="downloadDeploymentZip()" id="downloadBtn" style="display: none;">Download ZIP</button>
-                        <button class="btn btn-small" onclick="openWorkbench()" id="workbenchBtn" style="display: none;">Open Workbench</button>
+                        <button class="btn btn-small" data-action="copyCompleteXML">Copy XML</button>
+                        <button class="btn btn-small btn-primary download-btn" data-action="downloadDeploymentZip" id="downloadBtn" style="display: none;">Download ZIP</button>
+                        <button class="btn btn-small" data-action="openWorkbench" id="workbenchBtn" style="display: none;">Open Workbench</button>
                     </div>
                 </div>
                 <textarea id="completeXML" class="code" rows="20" readonly spellcheck="false" aria-label="Complete XML" placeholder="The complete XML appears here."></textarea>
@@ -139,12 +139,12 @@
                 <details class="extra">
                     <summary>Values only</summary>
                     <textarea id="output" class="code" rows="10" readonly spellcheck="false" aria-label="Values only"></textarea>
-                    <button class="btn btn-small" onclick="copyToClipboard()">Copy values</button>
+                    <button class="btn btn-small" data-action="copyToClipboard">Copy values</button>
                 </details>
                 <details class="extra">
                     <summary>package.xml</summary>
                     <textarea id="packageXML" class="code" rows="8" readonly spellcheck="false" aria-label="package.xml"></textarea>
-                    <button class="btn btn-small" onclick="copyPackageXML()">Copy package.xml</button>
+                    <button class="btn btn-small" data-action="copyPackageXML">Copy package.xml</button>
                 </details>
             </section>
         </div>

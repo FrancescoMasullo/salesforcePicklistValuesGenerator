@@ -153,3 +153,10 @@ document.addEventListener('keydown', e => {
         if ($('downloadBtn').style.display !== 'none') downloadDeploymentZip();
     }
 });
+
+// Buttons use data-action (inline onclick is blocked by the page CSP)
+const actions = { generateXML, clearData, copyToClipboard, copyCompleteXML, copyPackageXML, openWorkbench, downloadDeploymentZip };
+document.addEventListener('click', e => {
+    const fn = actions[e.target.closest('[data-action]')?.dataset.action];
+    if (fn) fn();
+});

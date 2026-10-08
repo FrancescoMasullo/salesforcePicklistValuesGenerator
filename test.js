@@ -71,3 +71,7 @@ assert.deepEqual(Object.keys(sf.files), ['force-app/main/default/globalValueSets
 assert.deepEqual(Object.keys(buildOutputs(field, []).files), ['package.xml', 'objects/Account.object']);
 
 console.log('All tests passed');
+
+// The page CSP blocks inline handlers: buttons must use data-action (see script.js)
+assert.ok(!/\son[a-z]+\s*=/i.test(require('node:fs').readFileSync('index.html', 'utf8')), 'inline event handler in index.html');
+console.log('CSP guard passed');
